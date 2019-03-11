@@ -1,62 +1,67 @@
 package br.com.cliente.api.rest.controller;
 
 import static org.junit.Assert.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import br.com.cliente.api.repository.ClienteRepository;
+import org.springframework.web.client.RestTemplate;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@WebAppConfiguration
+import br.com.cliente.api.dto.ViaCepResponse;
+import br.com.cliente.api.modelo.Cliente;
+import br.com.cliente.api.modelo.Estados;
+import br.com.cliente.api.modelo.Municipios;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class ClienteRestControllerTest {
+	
+	private static String URL_ENDPOINT_CLIENTE = "http://localhost:8080/api/cliente/";	
+	private RestTemplate restTemplate;
 			
-	private MockMvc mockMvc;	
-	@Mock
-	private ClienteRepository clienteRepository;
-		
-	@InjectMocks
-	private ClienteRestController clienteRestController;
-	
 	@Before
-	public void setUp() {		
-		MockitoAnnotations.initMocks(this);		
+	public void setUp() throws Exception {	
+		restTemplate = new RestTemplate();
 	}
 
-	//@Test
-	public void testConsultarCliente() throws Exception {
-		mockMvc.perform(get("/consultarCliente/{cpf}", "35532333033"))				
-				.andExpect(status().isOk());	
-				
-	}
-
-	//@Test
-	public void testConsultarCep() {
-		fail("Not yet implemented");
-	}
-
-	//@Test
-	public void testConsultarEstados() {
-		fail("Not yet implemented");
-	}
-
-	//@Test
-	public void testConsultarMunicipios() {
-		fail("Not yet implemented");
-	}
-
-	//@Test
-	public void testAlterarEndereco() {
-		fail("Not yet implemented");
-	}
-	
+	@Test
+	public void testConsultarCliente() throws Exception {		
 		
+		Cliente response = restTemplate.getForObject(URL_ENDPOINT_CLIENTE+"consultarCliente/35532333033", Cliente.class);
+		
+		Assert.assertNotNull(response);
+		assertEquals(response.getCpf(), "35532333033");
+	}
+
+	@Test
+	public void testConsultarCep() throws Exception {		
+		ViaCepResponse response = restTemplate.getForObject(URL_ENDPOINT_CLIENTE+"consultarCep/05734100", ViaCepResponse.class);
+		
+		Assert.assertNotNull(response);
+		assertEquals(response.getUf(), "SP");
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testConsultarEstados() {
+		List<Estados> response = restTemplate.getForObject(URL_ENDPOINT_CLIENTE+"consultarEstados", List.class);
+		
+		Assert.assertNotNull(response);
+		Assert.assertTrue(response.size() > 0);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testConsultarMunicipios() {
+		List<Municipios> response = restTemplate.getForObject(URL_ENDPOINT_CLIENTE+"consultarMunicipios/35", List.class);
+		
+		Assert.assertNotNull(response);
+		Assert.assertTrue(response.size() > 0);
+	}	
 
 }
